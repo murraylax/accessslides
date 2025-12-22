@@ -1,0 +1,161 @@
+% This file is part of Access Slides. 
+%
+% Copyright (C) 2025 James M. Murray
+%
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as published
+% by the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+%
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+% --- PDF/UA metadata (new + fallback) ---
+\ExplSyntaxOn
+\keys_if_exist:nnTF { document / metadata } { tags }
+  {
+    \DocumentMetadata{
+      pdfstandard = ua-1,
+      pdfversion  = 1.7,
+      tags,
+      lang        = en-US,
+      uncompress
+    }
+  }
+  {
+    \RequirePackage{pdfmanagement-testphase}
+    \DocumentMetadata{
+      testphase   = { tagging, uncompress },
+      pdfstandard = ua-1,
+      pdfversion  = 1.7,
+      lang        = en-US
+    }
+  }
+\ExplSyntaxOff
+% In then next line, 'colortheme' is color theme in R,G,B (0-255) format
+\documentclass[colortheme={8,92,150}, fontsize=18pt]{accessslides}
+
+\title{Accessible Slides for LaTeX}
+\author{James M. Murray, PhD}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{slide}{Basic Slide}
+  This is a basic slide. \\
+  
+  You can create slides using the \texttt{slide} environment: \\
+
+  \texttt{\textbackslash begin\{slide\}\{<Slide Title>\}\\
+  ... \\
+  \textbackslash end\{slide\}} \\
+
+  The content of each slide vertically-aligned to the top of the slide. Use \textbackslash\texttt{vspace*\{<length>\}} to adjust vertical position, if you wish. \\
+
+  Must be compiled with \texttt{lualatex}.
+\end{slide}
+
+\begin{slide}{Basic Slide with Lists}
+  \begin{enumerate}
+    \item This is a numbered list item
+    \item This is another numbered list item
+      \begin{itemize}
+        \item We can have bullet points too
+        \item And more bullets
+      \end{itemize}
+  \end{enumerate}
+\end{slide}
+
+\subsection{Subsections Make Section-Separator Slides}
+
+\section{Sections Mimic Regular Slides}
+
+\begin{itemize}
+  \item You can start a slide using \texttt{\textbackslash section\{\}} instead of \texttt{\textbackslash begin\{slide\}}
+  \item This makes it behave well with Markdown
+\end{itemize}
+
+\begin{slide}{Columns}
+  \begin{columns}
+    \begin{column}{0.48\linewidth}
+      You can make columns using the \texttt{columns} and \texttt{column} environments, much like Beamer.
+    \end{column}
+    \hfill
+    \begin{column}{0.48\linewidth}
+      \begin{itemize}
+        \item Make sure to join your columns with \texttt{\textbackslash hfill} with no line spaces
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{slide}
+
+\begin{slide}{Columns with Blocks}
+  \begin{columns}
+    \begin{column}{0.48\linewidth}
+      \begin{block}{Look at Me!}
+        You can stand out using the \texttt{block} environment.
+      \end{block}
+    \end{column}
+    \hfill
+    \begin{column}{0.48\linewidth}
+      \begin{block}{Another Block}
+        You can have multiple blocks in a slide.
+      \end{block}
+    \end{column}
+  \end{columns}
+
+  \begin{block}{Yet Another Block}
+    You can also have blocks that span the full slide width.
+  \end{block}
+\end{slide}
+
+\begin{slide}{Include Graphics with \texttt{accgraphics}}
+  \accgraphics[height=0.7\textheight]
+  {Production possibilities frontier (PPF) illustrating that points inside the PPF are possible but inefficient, points on the frontier and possible and efficient, and points outside are not possible.}
+  {./myimage.jpg}
+
+  The \texttt{accgraphics} environment works like \texttt{includegraphics}, but requires alt text for accessibility.
+\end{slide}
+
+\begin{slide}{Decorative Graphics with \texttt{decographics}}
+
+  \decographics[height=0.65\textheight]{./decorative.jpg}
+
+  Use \texttt{decographics} instead of \texttt{accgraphics} for purely decorative images. They do not require alt text and are ignored by assistive technologies.
+\end{slide}
+
+\begin{slide}{Math}
+  The \texttt{displaymath} environment is enhanced to optionally provide alt text for your math expressions. \\
+  
+  \begin{displaymath}[Sample standard deviation]
+    s = \sqrt{\frac{\displaystyle\sum_{i=1}^{n} x_i^2 - \frac{1}{n} \left(\sum_{i=1}^{n} x_i\right)^2}{n - 1}}
+  \end{displaymath}
+
+  \ \\ \ \\
+  The \texttt{equation} environment is similarly enhanced: 
+
+  \begin{equation}[Euler's Identity]
+    e^{i\pi} + 1 = 0 
+  \end{equation}
+\end{slide}
+
+\begin{slide}{Simple With Minimal Features}
+  \vspace*{-0.25in}
+  \begin{itemize}
+    \item This template is not nearly as full-featured as \href{https://latex-beamer.com/}{Beamer}.
+    \item Many Beamer functions to sequentially reveal items are not accessible, and so are intentionally omitted.
+    \item Other features like themes are omitted for simplicity and lack of time to work on it.
+    \item Copyright 2025 James Murray, \href{https://www.gnu.org/licenses/gpl-3.0.en.html}{GNU General Public License v3.0}.
+    \item This work is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of FITNESS FOR A PARTICULAR PURPOSE.
+    \item I welcome bug reports, feedback, and suggestions, but I have very limited time to maintain this project. Do not expect responses, fixes, or new features in a timely manner.
+  \end{itemize}
+\end{slide}
+
+\end{document}
