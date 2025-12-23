@@ -115,19 +115,19 @@
   \end{block}
 \end{slide}
 
-\begin{slide}{Include Graphics with \texttt{accgraphics}}
-  \accgraphics[height=0.7\textheight]
+\begin{slide}{Include Graphics with Alt Text}
+  \includegraphics[height=0.7\textheight]
   {Production possibilities frontier (PPF) illustrating that points inside the PPF are possible but inefficient, points on the frontier and possible and efficient, and points outside are not possible.}
   {./myimage.jpg}
 
-  The \texttt{accgraphics} environment works like \texttt{includegraphics}, but requires alt text for accessibility.
+  The \texttt{includegraphics} environment is redefined to require alternative text for accessibility.
 \end{slide}
 
 \begin{slide}{Decorative Graphics with \texttt{decographics}}
 
   \decographics[height=0.65\textheight]{./decorative.jpg}
 
-  Use \texttt{decographics} instead of \texttt{accgraphics} for purely decorative images. They do not require alt text and are ignored by assistive technologies.
+  Use \texttt{decographics} instead of \texttt{includegraphics} for purely decorative images. They do not require alt text and the images are ignored by assistive technologies.
 \end{slide}
 
 \begin{slide}{Math}

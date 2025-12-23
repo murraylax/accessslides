@@ -431,30 +431,39 @@
 
 % --- Graphics: decorative vs accessible ---
 \RequirePackage{graphicx}
-% Purely decorative Accessible graphics
+
+% Save original \includegraphics before redefining
+\let\origincludegraphics\includegraphics
+
+% Purely decorative graphics (marked as artifact, ignored by AT)
 % Usage: \decographics[<includegraphics options>]{<file>}
 % Default width is \linewidth if you omit options.
-% \accgraphics*[<opts>]{<file>}  --> decorative (artifact)
 \NewDocumentCommand{\decographics}{O{width=\linewidth} m}{%
   \par\noindent
   \tagmcbegin{artifact}%
-    \centering\includegraphics[#1]{#2}%
+    \centering\origincludegraphics[#1]{#2}%
   \tagmcend
   \par
 }
 
-% Accessible graphics
-% Usage: \accgraphics[<includegraphics options>]{<file>}
+% Redefine \includegraphics to be accessible by default
+% Usage: \includegraphics[<options>]{<alt text>}{<file>}
 % Default width is \linewidth if you omit options.
-\NewDocumentCommand{\accgraphics}{O{width=\linewidth} m m}{%
+\RenewDocumentCommand{\includegraphics}{O{width=\linewidth} m m}{%
   \par\noindent
   \tagstructbegin{tag=Figure,alttext=\unexpanded{#2}}% Put alttext on the Figure structure element
     \centering
     \tagmcbegin{tag=Figure}% No alttext needed on marked content
-      \includegraphics[#1]{#3}%
+      \origincludegraphics[#1]{#3}%
     \tagmcend
   \tagstructend
   \par
+}
+
+% Backwards compatibility: \accgraphics is now an alias for \includegraphics
+% Usage: \accgraphics[<options>]{<alt text>}{<file>}
+\NewDocumentCommand{\accgraphics}{O{width=\linewidth} m m}{%
+  \includegraphics[#1]{#2}{#3}%
 }
 
 % --- Beamer-like blocks (fused title band, rounded corners) ---
