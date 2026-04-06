@@ -1,10 +1,13 @@
+% accessslides.cls  — Accessible slides class (PDF/UA; themable)
+
 % This file is part of Access Slides. 
 %
 % Copyright (C) 2025 James M. Murray
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Affero General Public License as published
-% by the Free Software Foundation, version 3 of the License.
+% by the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
 %
 % This program is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -91,10 +94,8 @@
 % --- PDF tagging core ---
 \RequirePackage{tagpdf}
 \tagpdfsetup{
-  activate-all,
   interwordspace = true,
-  tabsorder      = structure,
-  paratagging    = true
+  tabsorder      = structure
 }
 
 % --- TikZ & libraries ---
@@ -116,13 +117,13 @@
 
 % --- Slide H2 title (semantic H2; drawing is artifact) ---
 \newcommand{\slidetitle}[1]{
-  {\tagpdfsetup{paratagging=false}
+  {\tagpdfsetup{paratagging=false}%
     \noindent
     \raisebox{1.2\SlideTitleLift}[0pt][0pt]{%
       \makebox[\linewidth][l]{%
         {\TitleFont\bfseries\fontsize{25pt}{30pt}\selectfont\color{white}%
         \hyphenpenalty=10000\exhyphenpenalty=10000\pretolerance=10000
-        \tagstructbegin{tag=H2}#1\tagstructend}%
+        \tagstructbegin{tag=H1}#1\tagstructend}%
       }%
     }%
     \par%
@@ -147,6 +148,7 @@
 \makeatletter
 \NewDocumentEnvironment{slide}{ m }{%
   \clearpage
+  \tagstructbegin{tag=Sect}%
   % Draw bars as artifacts (ignored by AT)
   \tagmcbegin{artifact}%
   \begin{tikzpicture}[remember picture,overlay]
@@ -190,7 +192,9 @@
 
   % Semantic title in white, positioned into the top bar
   \slidetitle{#1}%
-}{}
+}{%
+  \tagstructend
+}
 \makeatother
 
 % --- Page number (artifact) ---
@@ -274,8 +278,7 @@
     filecolor=slidebar,
     menucolor=slidebar,
     runcolor=slidebar,
-    pdfborder={0 0 0},
-    breaklinks=true
+    pdfborder={0 0 0}
   }%
 }
 \makeatother
@@ -285,6 +288,7 @@
 \renewcommand{\subsection}[1]{
   {\tagpdfsetup{paratagging=false}%
     \clearpage
+    \tagstructbegin{tag=Sect}%
     \centering
 
     % Draw bars as artifacts (ignored by AT)
@@ -347,11 +351,13 @@
     \end{tikzpicture}
 
     \vfill
+    \tagstructend
 }}
 
 
 \renewcommand{\section}[1]{
   \clearpage
+  \tagstructbegin{tag=Sect}%
   % Draw bars as artifacts (ignored by AT)
   \tagmcbegin{artifact}%
   \begin{tikzpicture}[remember picture,overlay]
@@ -394,6 +400,7 @@
 
   % Semantic title in white, positioned into the top bar
   \slidetitle{#1}%
+  \tagstructend
 }
 \makeatother
 
@@ -411,64 +418,99 @@
 % the boxes (minipages) aren\'t treated as children of an open P. Inside each
 % column we re-enable paratagging so text becomes proper paragraphs.
 \NewDocumentEnvironment{columns}{}{%
-  \par\tagpdfsetup{paratagging=false}% suppress paragraph structures for layout
-  \noindent
+  \par\noindent
 }{%
-  \par\tagpdfsetup{paratagging=true}% restore paragraph tagging after layout
+  \par
 }
 
 % Single column (minipage). Optional arg = vertical alignment (t,c,b)
 \NewDocumentEnvironment{column}{m O{t}}{%
   % Open minipage while paratagging is off, then re-enable for content
   \begin{minipage}[#2]{#1}%
-  	\tagpdfsetup{paratagging=true}% content paragraphs allowed
+
     \begin{minipage}[t]{\textwidth}%
 }{%
     \end{minipage}%
   \end{minipage}%
-  \tagpdfsetup{paratagging=false}% back to layout mode until columns end
 }
 
 % --- Graphics: decorative vs accessible ---
 \RequirePackage{graphicx}
 
-% Save original \includegraphics before redefining
-\let\origincludegraphics\includegraphics
+% Save original includegraphics before redefining
+\let\OrigIncludegraphics\includegraphics
 
-% Purely decorative graphics (marked as artifact, ignored by AT)
+% Purely decorative graphics (artifact, ignored by AT)
 % Usage: \decographics[<includegraphics options>]{<file>}
 % Default width is \linewidth if you omit options.
 \NewDocumentCommand{\decographics}{O{width=\linewidth} m}{%
   \par\noindent
   \tagmcbegin{artifact}%
-    \centering\origincludegraphics[#1]{#2}%
+    \centering\OrigIncludegraphics[#1]{#2}%
   \tagmcend
   \par
 }
 
-% Redefine \includegraphics to be accessible by default
-% Usage: \includegraphics[<options>]{<alt text>}{<file>}
+% Accessible graphics (legacy command)
+% Usage: \accgraphics[<includegraphics options>]{<alt text>}{<file>}
 % Default width is \linewidth if you omit options.
-\RenewDocumentCommand{\includegraphics}{O{width=\linewidth} m m}{%
+\NewDocumentCommand{\accgraphics}{O{width=\linewidth} m m}{%
   \par\noindent
   \tagstructbegin{tag=Figure,alttext=\unexpanded{#2}}% Put alttext on the Figure structure element
     \centering
     \tagmcbegin{tag=Figure}% No alttext needed on marked content
-      \origincludegraphics[#1]{#3}%
+      \OrigIncludegraphics[#1]{#3}%
     \tagmcend
   \tagstructend
   \par
 }
 
-% Backwards compatibility: \accgraphics is now an alias for \includegraphics
-% Usage: \accgraphics[<options>]{<alt text>}{<file>}
-\NewDocumentCommand{\accgraphics}{O{width=\linewidth} m m}{%
-  \includegraphics[#1]{#2}{#3}%
+% Redefine \includegraphics to require alt text for accessibility
+% Usage: \includegraphics[<options>]{<alt text>}{<file>}
+\RenewDocumentCommand{\includegraphics}{O{width=\linewidth} m m}{%
+  \par\noindent
+  \tagstructbegin{tag=Figure,alttext=\unexpanded{#2}}%
+    \centering
+    \tagmcbegin{tag=Figure}%
+      \OrigIncludegraphics[#1]{#3}%
+    \tagmcend
+  \tagstructend
+  \par
 }
 
 % --- Beamer-like blocks (fused title band, rounded corners) ---
 % First define the internal tcolorbox without tagging interference
-\RequirePackage[most]{tcolorbox}
+% Load tcolorbox but exclude the 'block' library which conflicts with enumitem
+\RequirePackage[skins,breakable,hooks,xparse,fitting]{tcolorbox}
+
+% --- Lists & paragraph spacing (fixed) ---
+% Load enumitem AFTER tcolorbox to avoid option conflicts
+\RequirePackage{enumitem}
+\setlist{itemsep=0.25em, topsep=0.4em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0em}
+
+% Register enumitem keys with the latex-lab block module so they are not
+% rejected as "unknown" (TeX Live 2025+ / latex-lab block).
+\ExplSyntaxOn
+\cs_if_exist:NT \keys_define:nn {
+  \keys_define:nn { template/list/std }
+  {
+    itemsep     .skip_set:N = \itemsep,
+    leftmargin  .dim_set:N  = \leftmargin,
+    rightmargin .dim_set:N  = \rightmargin,
+    topsep      .skip_set:N = \topsep,
+    parsep      .skip_set:N = \parsep,
+    partopsep   .skip_set:N = \partopsep,
+    labelwidth  .dim_set:N  = \labelwidth,
+    labelsep    .dim_set:N  = \labelsep,
+    itemindent  .dim_set:N  = \itemindent,
+    listparindent .dim_set:N = \listparindent,
+  }
+}
+\ExplSyntaxOff
+
+% Now define the tcolorbox environment
 \newtcolorbox{accblockinternal}[1]{%
   enhanced,breakable,width=\linewidth,
   colframe=slidebar,colback=slidebar!16,boxrule=0pt,
@@ -511,69 +553,82 @@
 % Now create the user-facing environment that manages tagging
 \NewDocumentEnvironment{accblock}{m}{%
   \par\medskip
-  \tagpdfsetup{paratagging=false}% Disable paragraph tagging
   \begin{accblockinternal}{#1}%
 }{%
   \end{accblockinternal}%
-  \tagpdfsetup{paratagging=true}% Re-enable paragraph tagging
   \par\medskip
 }
 \NewDocumentEnvironment{block}{m}{%
   \par\medskip
-  \tagpdfsetup{paratagging=false}% Disable paragraph tagging
   \begin{accblockinternal}{#1}%
 }{%
   \end{accblockinternal}%
-  \tagpdfsetup{paratagging=true}% Re-enable paragraph tagging
   \par\medskip
 }
 
 % --- Accessible display/equation with optional alt text ---
-% Accessible display math: redefine 'displaymath' to add tagging + optional alt text.
-% Usage: \begin{displaymath}[Plain-language description] ... \end{displaymath}
-% If optional argument omitted, no alt text is added.
-\let\origdisplaymath\displaymath
-\let\origenddisplaymath\enddisplaymath
-\RenewDocumentEnvironment{displaymath}{ O{} }{%
-  % Start original display math (sets up math mode)
-  \origdisplaymath
-  % Immediately open structure element so formula content is inside it
+% With testphase=latest, latex-lab already tags math environments automatically.
+% The accmath and acceqn environments add alt text support.
+%
+% Usage: \begin{accmath}[Plain-language description] ... \end{accmath}
+% Usage: \begin{acceqn}[Plain-language description] ... \end{acceqn}
+%
+% Standard displaymath and equation are left for latex-lab to handle natively.
+
+\makeatletter
+% Save catcode-3 (math shift) $ tokens to bypass latex-lab's active-$ hooks
+\begingroup
+\catcode`\$=3\relax
+\gdef\accessslides@mathopen{$}%
+\gdef\accessslides@mathclose{$}%
+\endgroup
+
+% Accessible displaymath: manually tag with alt text
+% Uses inline $\displaystyle...$ with catcode-3 $ to bypass latex-lab hooks,
+% centered via \hfil to simulate display math without $$ paragraph effects.
+\ExplSyntaxOn
+\NewDocumentEnvironment{accmath}{ O{} }{%
+  \par\addvspace{\abovedisplayskip}%
   \if\relax\detokenize{#1}\relax
-    	\tagstructbegin{tag=Formula}% no alt text
+    \tagstructbegin{tag=Formula}%
   \else
-    	\tagstructbegin{tag=Formula,alttext=\unexpanded{#1}}%
+    \tagstructbegin{tag=Formula,alttext={#1}}%
   \fi
+  \tagmcbegin{tag=Formula}%
+  \noindent\hfil
+  \bool_set_true:N \l__math_collected_bool
+  \accessslides@mathopen\displaystyle
 }{%
-  % Close structure before leaving display math environment
+  \accessslides@mathclose
+  \hfil\null
+  \tagmcend
   \tagstructend
-  \origenddisplaymath
+  \par\addvspace{\belowdisplayskip}%
 }
 
-% Accessible equation: redefine 'equation' to add tagging + optional alt text.
-% Usage: \begin{equation}[Plain-language description] ... \end{equation}
-% If optional argument omitted, no alt text is added.
-\let\origequation\equation
-\let\origendequation\endequation
-\RenewDocumentEnvironment{equation}{ O{} }{%
-  % Start original display math (sets up math mode)
-  \origequation
-  % Immediately open structure element so formula content is inside it
+% Accessible equation (numbered): same approach with equation number
+\newcounter{accesslideseqn}
+\NewDocumentEnvironment{acceqn}{ O{} }{%
+  \stepcounter{accesslideseqn}%
+  \par\addvspace{\abovedisplayskip}%
   \if\relax\detokenize{#1}\relax
-    	\tagstructbegin{tag=Formula}% no alt text
+    \tagstructbegin{tag=Formula}%
   \else
-    	\tagstructbegin{tag=Formula,alttext=\unexpanded{#1}}%
+    \tagstructbegin{tag=Formula,alttext={#1}}%
   \fi
+  \tagmcbegin{tag=Formula}%
+  \noindent\hfil
+  \bool_set_true:N \l__math_collected_bool
+  \accessslides@mathopen\displaystyle
 }{%
-  % Close structure before leaving display math environment
+  \accessslides@mathclose
+  \hfil(\theaccesslideseqn)%
+  \tagmcend
   \tagstructend
-  \origendequation
+  \par\addvspace{\belowdisplayskip}%
 }
-
-% --- Lists & paragraph spacing (fixed) ---
-\RequirePackage{enumitem}
-\setlist{itemsep=0.25em, topsep=0.4em}
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{0em}
+\ExplSyntaxOff
+\makeatother
 
 % --- Decorative rule helper (artifact) ---
 \newcommand{\decorativerule}{%

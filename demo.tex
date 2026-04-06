@@ -14,28 +14,15 @@
 % You should have received a copy of the GNU Affero General Public License
 % along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-% --- PDF/UA metadata (new + fallback) ---
-\ExplSyntaxOn
-\keys_if_exist:nnTF { document / metadata } { tags }
-  {
-    \DocumentMetadata{
-      pdfstandard = ua-1,
-      pdfversion  = 1.7,
-      tags,
-      lang        = en-US,
-      uncompress
-    }
-  }
-  {
-    \RequirePackage{pdfmanagement-testphase}
-    \DocumentMetadata{
-      testphase   = { tagging, uncompress },
-      pdfstandard = ua-1,
-      pdfversion  = 1.7,
-      lang        = en-US
-    }
-  }
-\ExplSyntaxOff
+% --- PDF/UA metadata ---
+\DocumentMetadata{
+  testphase   = latest,
+  pdfstandard = ua-1,
+  pdfversion  = 1.7,
+  lang        = en-US,
+  uncompress
+}
+
 % In then next line, 'colortheme' is color theme in R,G,B (0-255) format
 \documentclass[colortheme={8,92,150}, fontsize=18pt]{accessslides}
 
@@ -131,18 +118,18 @@
 \end{slide}
 
 \begin{slide}{Math}
-  The \texttt{displaymath} environment is enhanced to optionally provide alt text for your math expressions. \\
+  The \texttt{accmath} environment provides display math with alt text for accessibility. \\
   
-  \begin{displaymath}[Sample standard deviation]
+  \begin{accmath}[Sample standard deviation]
     s = \sqrt{\frac{\displaystyle\sum_{i=1}^{n} x_i^2 - \frac{1}{n} \left(\sum_{i=1}^{n} x_i\right)^2}{n - 1}}
-  \end{displaymath}
+  \end{accmath}
 
   \ \\ \ \\
-  The \texttt{equation} environment is similarly enhanced: 
+  The \texttt{acceqn} environment is a numbered equation with alt text: 
 
-  \begin{equation}[Euler's Identity]
+  \begin{acceqn}[Euler's Identity]
     e^{i\pi} + 1 = 0 
-  \end{equation}
+  \end{acceqn}
 \end{slide}
 
 \begin{slide}{Simple With Minimal Features}
