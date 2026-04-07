@@ -490,6 +490,54 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0em}
 
+% --- Redefine itemize/enumerate to support per-environment enumitem options ---
+% (e.g., [leftmargin=5pc]) which latex-lab tagging otherwise blocks.
+\makeatletter
+% Storage for list options
+\newlength{\accessslides@listmargin}
+
+% Define keys for list options
+\define@key{accessslideslist}{leftmargin}{\setlength{\accessslides@listmargin}{#1}}
+
+% Save original environments before latex-lab modifies them
+\let\accessslides@origitemize\itemize
+\let\accessslides@endorigitemize\enditemize
+\let\accessslides@origenumerate\enumerate
+\let\accessslides@endorigenumerate\endenumerate
+
+\AtBeginDocument{%
+  % Now save the latex-lab tagged versions
+  \let\accessslides@taggeditemize\itemize
+  \let\accessslides@endtaggeditemize\enditemize
+  \let\accessslides@taggedenumerate\enumerate
+  \let\accessslides@endtaggedenumerate\endenumerate
+  
+  % Redefine itemize to accept leftmargin option
+  \renewenvironment{itemize}[1][]{%
+    \setlength{\accessslides@listmargin}{0pt}%
+    \setkeys{accessslideslist}{#1}%
+    \ifdim\accessslides@listmargin>0pt
+      \setlength{\leftmargini}{\accessslides@listmargin}%
+    \fi
+    \accessslides@taggeditemize
+  }{%
+    \accessslides@endtaggeditemize
+  }%
+  
+  % Redefine enumerate to accept leftmargin option
+  \renewenvironment{enumerate}[1][]{%
+    \setlength{\accessslides@listmargin}{0pt}%
+    \setkeys{accessslideslist}{#1}%
+    \ifdim\accessslides@listmargin>0pt
+      \setlength{\leftmargini}{\accessslides@listmargin}%
+    \fi
+    \accessslides@taggedenumerate
+  }{%
+    \accessslides@endtaggedenumerate
+  }%
+}
+\makeatother
+
 % Register enumitem keys with the latex-lab block module so they are not
 % rejected as "unknown" (TeX Live 2025+ / latex-lab block).
 \ExplSyntaxOn
