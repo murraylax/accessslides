@@ -228,8 +228,8 @@
   {\tagpdfsetup{paratagging=false}%
     \begin{titlepage}
       \centering
-      \begin{tikzpicture}[remember picture] % no 'overlay' needed here
         \tagstructbegin{tag=H1}%
+        \begin{tikzpicture}[remember picture] % no 'overlay' needed here
           \node (titletext)
             [align=center, text width=0.9\textwidth]
             {%
@@ -240,8 +240,6 @@
                 \color{white}\strut\@title\par
               }%
             };
-        \tagstructend
-
 
         % Background box behind the node
         \begin{pgfonlayer}{background}
@@ -253,6 +251,7 @@
           \tagmcend
         \end{pgfonlayer}
       \end{tikzpicture}
+      \tagstructend
 
       \vspace{2\baselineskip}
       % Make the author a real paragraph (since we disabled paratagging in the group)
