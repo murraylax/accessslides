@@ -494,9 +494,19 @@
 \makeatletter
 % Storage for list options
 \newlength{\accessslides@listmargin}
+\let\accessslides@listitemsep\@empty
 
 % Define keys for list options
-\define@key{accessslideslist}{leftmargin}{\setlength{\accessslides@listmargin}{#1}}
+% leftmargin accepts a dimension, or '*' (enumitem auto) which we ignore so the
+% default margin is kept instead of raising a "Missing number" error.
+\define@key{accessslideslist}{leftmargin}{%
+  \def\accessslides@tmp{#1}%
+  \def\accessslides@star{*}%
+  \ifx\accessslides@tmp\accessslides@star\else
+    \setlength{\accessslides@listmargin}{#1}%
+  \fi
+}
+\define@key{accessslideslist}{itemsep}{\def\accessslides@listitemsep{#1}}
 
 % Save original environments before latex-lab modifies them
 \let\accessslides@origitemize\itemize
@@ -511,26 +521,34 @@
   \let\accessslides@taggedenumerate\enumerate
   \let\accessslides@endtaggedenumerate\endenumerate
   
-  % Redefine itemize to accept leftmargin option
+  % Redefine itemize to accept leftmargin and itemsep options
   \renewenvironment{itemize}[1][]{%
     \setlength{\accessslides@listmargin}{0pt}%
+    \let\accessslides@listitemsep\@empty
     \setkeys{accessslideslist}{#1}%
     \ifdim\accessslides@listmargin>0pt
       \setlength{\leftmargini}{\accessslides@listmargin}%
     \fi
     \accessslides@taggeditemize
+    \ifx\accessslides@listitemsep\@empty\else
+      \setlength{\itemsep}{\accessslides@listitemsep}%
+    \fi
   }{%
     \accessslides@endtaggeditemize
   }%
   
-  % Redefine enumerate to accept leftmargin option
+  % Redefine enumerate to accept leftmargin and itemsep options
   \renewenvironment{enumerate}[1][]{%
     \setlength{\accessslides@listmargin}{0pt}%
+    \let\accessslides@listitemsep\@empty
     \setkeys{accessslideslist}{#1}%
     \ifdim\accessslides@listmargin>0pt
       \setlength{\leftmargini}{\accessslides@listmargin}%
     \fi
     \accessslides@taggedenumerate
+    \ifx\accessslides@listitemsep\@empty\else
+      \setlength{\itemsep}{\accessslides@listitemsep}%
+    \fi
   }{%
     \accessslides@endtaggedenumerate
   }%
