@@ -494,6 +494,7 @@
 \makeatletter
 % Storage for list options
 \newlength{\accessslides@listmargin}
+\newif\ifaccessslides@setmargin
 \let\accessslides@listitemsep\@empty
 
 % Define keys for list options
@@ -504,6 +505,7 @@
   \def\accessslides@star{*}%
   \ifx\accessslides@tmp\accessslides@star\else
     \setlength{\accessslides@listmargin}{#1}%
+    \accessslides@setmargintrue
   \fi
 }
 \define@key{accessslideslist}{itemsep}{\def\accessslides@listitemsep{#1}}
@@ -523,10 +525,11 @@
   
   % Redefine itemize to accept leftmargin and itemsep options
   \renewenvironment{itemize}[1][]{%
+    \accessslides@setmarginfalse
     \setlength{\accessslides@listmargin}{0pt}%
     \let\accessslides@listitemsep\@empty
     \setkeys{accessslideslist}{#1}%
-    \ifdim\accessslides@listmargin>0pt
+    \ifaccessslides@setmargin
       \setlength{\leftmargini}{\accessslides@listmargin}%
     \fi
     \accessslides@taggeditemize
@@ -539,10 +542,11 @@
   
   % Redefine enumerate to accept leftmargin and itemsep options
   \renewenvironment{enumerate}[1][]{%
+    \accessslides@setmarginfalse
     \setlength{\accessslides@listmargin}{0pt}%
     \let\accessslides@listitemsep\@empty
     \setkeys{accessslideslist}{#1}%
-    \ifdim\accessslides@listmargin>0pt
+    \ifaccessslides@setmargin
       \setlength{\leftmargini}{\accessslides@listmargin}%
     \fi
     \accessslides@taggedenumerate
